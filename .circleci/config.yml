@@ -1,0 +1,38 @@
+# CircleCI configuration file
+
+version: 2.1
+orbs:
+  git-shallow-clone: guitarrapc/git-shallow-clone@2.4.0
+  node: circleci/node@5.0.2
+jobs:
+  build:
+    machine: true
+    steps:
+      - git-shallow-clone/checkout
+      - restore_cache:
+          keys:
+            - v1-dependency-{{ checksum "package-lock.json" }}
+            - v1-dependency-
+      - run: docker run --name=simple-oauth -e MARIADB_ROOT_PASSWORD=${PASSWORD} -e MARIADB_DATABASE=${DATABASE} -p 6603:3306 -d mariadb:latest
+      - node/install:
+          node-version: '16.15'
+      - run: node --version
+      - run: npm ci
+      - save_cache:
+          key: v1-dependency-{{ checksum "package-lock.json" }}
+          paths:
+            - ./node_modules
+      - run:
+          command: |
+            touch .env
+            echo "DATABASE=${DATABASE}" >> .env
+            echo "DATABASE_PORT=${DATABASE_PORT}" >> .env
+            echo "DATABASE_USER=${DATABASE_USER}" >> .env
+            echo "DIALECT=${DIALECT}" >> .env
+            echo "HOST=${HOST}" >> .env
+            echo "MAX=${MAX}" >> .env
+            echo "MIN=${MIN}" >> .env
+            echo "PASSWORD=${PASSWORD}" >> .env
+            cat .env
+            npx sequelize-cli db:migrate
+            npm run test
