@@ -16,7 +16,7 @@ export class SubcriptionController {
     return await this.subscriptionsService.registerSubscriptions(createSubscriptions);
   }
   @Get()
-  async getSubscription(): Promise<SubscriptionsList> {
+  async getSubscriptionList(): Promise<SubscriptionsList> {
     const subscriptions: CreateSubscriptionsResponse[] = await this.subscriptionsService.getSubscriptionList();
     return { subscriptions };
   }
