@@ -3,6 +3,7 @@ import { CreateSubscriptions } from './dto/CreateSubscriptions';
 import { SubscriptionsService } from './SubscriptionsService';
 import { CreateSubscriptionsResponse } from './dto/CreateSubscriptionsResponse';
 import { ValidationPipe } from './pipe/ValidationPipe';
+import { SubscriptionsList } from './dto/SubscriptionsList';
 
 @Controller('/subscriptions')
 export class SubcriptionController {
@@ -13,5 +14,10 @@ export class SubcriptionController {
     @Body(new ValidationPipe()) createSubscriptions: CreateSubscriptions,
   ): Promise<CreateSubscriptionsResponse> {
     return await this.subscriptionsService.registerSubscriptions(createSubscriptions);
+  }
+  @Get()
+  async getSubscription(): Promise<SubscriptionsList> {
+    const subscriptions: CreateSubscriptionsResponse[] = await this.subscriptionsService.getSubscriptionList();
+    return { subscriptions };
   }
 }
