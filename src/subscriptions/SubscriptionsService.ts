@@ -1,17 +1,22 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, FindOptionsWhere } from 'typeorm';
 import { Subscriptions } from './entity/Subscriptions';
 import { CreateSubscriptionsResponse } from './dto/CreateSubscriptionsResponse';
 import { CreateSubscriptions } from './dto/CreateSubscriptions';
 import { ethers } from 'ethers';
 import { plainToClass, plainToInstance } from 'class-transformer';
+import { ChainEventLog } from './entity/ChainEventLog';
+import { SummaryLog } from './dto/SummaryLog';
+import { GetSubscriptionsResponseDto } from './dto/GetSubscriptionsResponseDto';
 
 @Injectable()
 export class SubscriptionsService {
   constructor(
     @InjectRepository(Subscriptions)
     private subscriptionsRepository: Repository<Subscriptions>,
+    @InjectRepository(ChainEventLog)
+    private chainEventLogRepository: Repository<ChainEventLog>,
   ) {}
   async registerSubscriptions(subcriptions: CreateSubscriptions): Promise<CreateSubscriptionsResponse> {
     const result = await this.subscriptionsRepository.save(subcriptions);
@@ -27,18 +32,23 @@ export class SubscriptionsService {
 
     daiContract.on('Transfer', (from, to, amount, event) => {
       console.log(`Transfer ${from} sent ${ethers.utils.formatEther(amount)} to ${to}`);
+      console.log(event);
     });
     daiContract.on('Approval', (from, to, amount, event) => {
       console.log(`Approval ${from} sent ${ethers.utils.formatEther(amount)} to ${to}`);
+      console.log(event);
     });
     daiContract.on('ApprovalForAll', (from, to, isApproval, event) => {
       console.log(`ApprovalForAll ${from} sent ${isApproval} to ${to}`);
+      console.log(event);
     });
     daiContract.on('PunkOffered', (value1, value2, address, event) => {
       console.log(`PunkOffered ${value1}  ${value2} to ${address}`);
+      console.log(event);
     });
     daiContract.on('PunkTransfer', (from, to, amount, event) => {
       console.log(`PunkTransfer ${from} sent ${ethers.utils.formatEther(amount)} to ${to}`);
+      console.log(event);
     });
     return plainToClass(CreateSubscriptionsResponse, result);
   }
@@ -46,5 +56,25 @@ export class SubscriptionsService {
   async getSubscriptionList(): Promise<CreateSubscriptionsResponse[]> {
     const subcriptions: Subscriptions[] = await this.subscriptionsRepository.find();
     return plainToInstance(CreateSubscriptionsResponse, subcriptions);
+  }
+
+  async getSubscription(subscriptionId: number): Promise<GetSubscriptionsResponseDto> {
+    const subscription: Subscriptions = await this.subscriptionsRepository
+      .createQueryBuilder()
+      .where('id = :id', { id: subscriptionId })
+      .getOne();
+    const where: FindOptionsWhere<ChainEventLog> = {
+      contractAddress: subscription.contractAddress,
+    };
+
+    const [log, logSize]: [log: ChainEventLog[], logSize: number] = await this.chainEventLogRepository.findAndCountBy(
+      where,
+    );
+    const summary: SummaryLog = plainToClass(SummaryLog, { logSize, firstLogTimestamp: log[0].timestamp });
+    const subscriptions: GetSubscriptionsResponseDto = plainToClass(GetSubscriptionsResponseDto, {
+      ...plainToClass(CreateSubscriptionsResponse, subscription),
+      ...summary,
+    });
+    return subscriptions;
   }
 }
