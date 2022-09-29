@@ -6,12 +6,12 @@ import { ValidationPipe } from './pipe/ValidationPipe';
 
 @Controller('/subscriptions')
 export class SubcriptionController {
-  constructor(private readonly appService: SubscriptionsService) {}
+  constructor(private readonly subscriptionsService: SubscriptionsService) {}
 
   @Post()
   async registerSubscription(
     @Body(new ValidationPipe()) createSubscriptions: CreateSubscriptions,
   ): Promise<CreateSubscriptionsResponse> {
-    return await this.appService.registerSubscriptions(createSubscriptions);
+    return await this.subscriptionsService.registerSubscriptions(createSubscriptions);
   }
 }
