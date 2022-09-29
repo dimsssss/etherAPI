@@ -3,15 +3,21 @@ import { CreateSubscriptions } from './dto/CreateSubscriptions';
 import { SubscriptionsService } from './SubscriptionsService';
 import { CreateSubscriptionsResponse } from './dto/CreateSubscriptionsResponse';
 import { ValidationPipe } from './pipe/ValidationPipe';
+import { SubscriptionsList } from './dto/SubscriptionsList';
 
 @Controller('/subscriptions')
 export class SubcriptionController {
-  constructor(private readonly appService: SubscriptionsService) {}
+  constructor(private readonly subscriptionsService: SubscriptionsService) {}
 
   @Post()
   async registerSubscription(
     @Body(new ValidationPipe()) createSubscriptions: CreateSubscriptions,
   ): Promise<CreateSubscriptionsResponse> {
-    return await this.appService.registerSubscriptions(createSubscriptions);
+    return await this.subscriptionsService.registerSubscriptions(createSubscriptions);
+  }
+  @Get()
+  async getSubscription(): Promise<SubscriptionsList> {
+    const subscriptions: CreateSubscriptionsResponse[] = await this.subscriptionsService.getSubscriptionList();
+    return { subscriptions };
   }
 }
