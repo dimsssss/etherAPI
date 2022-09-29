@@ -5,7 +5,7 @@ import { Subscriptions } from './entity/Subscriptions';
 import { CreateSubscriptionsResponse } from './dto/CreateSubscriptionsResponse';
 import { CreateSubscriptions } from './dto/CreateSubscriptions';
 import { ethers } from 'ethers';
-import { plainToClass } from 'class-transformer';
+import { plainToClass, plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class SubscriptionsService {
@@ -41,5 +41,10 @@ export class SubscriptionsService {
       console.log(`PunkTransfer ${from} sent ${ethers.utils.formatEther(amount)} to ${to}`);
     });
     return plainToClass(CreateSubscriptionsResponse, result);
+  }
+
+  async getSubscriptionList(): Promise<CreateSubscriptionsResponse[]> {
+    const subcriptions: Subscriptions[] = await this.subscriptionsRepository.find();
+    return plainToInstance(CreateSubscriptionsResponse, subcriptions);
   }
 }
