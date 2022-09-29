@@ -27,37 +27,19 @@ export class SubscriptionsService {
 
     daiContract.on('Transfer', (from, to, amount, event) => {
       console.log(`Transfer ${from} sent ${ethers.utils.formatEther(amount)} to ${to}`);
-      // The event object contains the verbatim log data, the
-      // EventFragment and functions to fetch the block,
-      // transaction and receipt and event functions
     });
     daiContract.on('Approval', (from, to, amount, event) => {
       console.log(`Approval ${from} sent ${ethers.utils.formatEther(amount)} to ${to}`);
-      // The event object contains the verbatim log data, the
-      // EventFragment and functions to fetch the block,
-      // transaction and receipt and event functions
     });
     daiContract.on('ApprovalForAll', (from, to, isApproval, event) => {
       console.log(`ApprovalForAll ${from} sent ${isApproval} to ${to}`);
-      // The event object contains the verbatim log data, the
-      // EventFragment and functions to fetch the block,
-      // transaction and receipt and event functions
     });
     daiContract.on('PunkOffered', (value1, value2, address, event) => {
       console.log(`PunkOffered ${value1}  ${value2} to ${address}`);
-      // The event object contains the verbatim log data, the
-      // EventFragment and functions to fetch the block,
-      // transaction and receipt and event functions
     });
     daiContract.on('PunkTransfer', (from, to, amount, event) => {
       console.log(`PunkTransfer ${from} sent ${ethers.utils.formatEther(amount)} to ${to}`);
-      // The event object contains the verbatim log data, the
-      // EventFragment and functions to fetch the block,
-      // transaction and valuereceipt and event functions
     });
-    console.log([].concat(result.topics.split(',')));
-    console.log();
-    console.log(subcriptions);
     return plainToClass(CreateSubscriptionsResponse, result);
   }
 }
