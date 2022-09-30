@@ -3,6 +3,7 @@ import { SubcriptionModule } from './subscriptions/SubcriptionModule';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Subscriptions } from './subscriptions/entity/Subscriptions';
 import { ChainEventLog } from './subscriptions/entity/ChainEventLog';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { ChainEventLog } from './subscriptions/entity/ChainEventLog';
       database: './data/ether.sqlite',
       entities: [Subscriptions, ChainEventLog],
     }),
+    ConfigModule.forRoot(),
     SubcriptionModule,
   ],
 })
