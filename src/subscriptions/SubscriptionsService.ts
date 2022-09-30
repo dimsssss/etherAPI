@@ -9,6 +9,8 @@ import { plainToClass, plainToInstance } from 'class-transformer';
 import { ChainEventLog } from './entity/ChainEventLog';
 import { SummaryLog } from './dto/SummaryLog';
 import { GetSubscriptionsResponseDto } from './dto/GetSubscriptionsResponseDto';
+import { ABI } from './enums/ABI';
+import { NotFoundSubcription } from './exceptions/NotFoundSubcription';
 
 @Injectable()
 export class SubscriptionsService {
@@ -20,16 +22,8 @@ export class SubscriptionsService {
   ) {}
   async registerSubscriptions(subcriptions: CreateSubscriptions): Promise<CreateSubscriptionsResponse> {
     const result = await this.subscriptionsRepository.save(subcriptions);
-    const infura = await new ethers.providers.InfuraProvider('homestead', '31a0448161bd4c9c9dcb5cf5fa715cd4');
-    const daiAbi: string[] = [
-      'event Transfer(address indexed from, address indexed to, uint256 amount)',
-      'event Approval(address indexed from, address indexed to, uint256 amount)',
-      'event ApprovalForAll(address indexed from, address indexed to, bool isApproval)',
-      'event PunkOffered(uint256, uint256, address)',
-      'event PunkTransfer(address, address, uint256)',
-    ];
-
-    const daiContract = new ethers.Contract(subcriptions.contractAddress, daiAbi, infura);
+    const infura = await new ethers.providers.InfuraProvider(process.env.NETWORK, process.env.API_KEY);
+    const daiContract = new ethers.Contract(subcriptions.contractAddress, Object.values(ABI), infura);
 
     daiContract.on('Transfer', (from, to, amount, event) => {
       this.chainEventLogRepository.save(plainToClass(ChainEventLog, event));
@@ -72,5 +66,24 @@ export class SubscriptionsService {
       ...summary,
     });
     return subscriptions;
+  }
+
+  async deleteSubscription(subscriptionId: number): Promise<void> {
+    const where: FindOptionsWhere<ChainEventLog> = {
+      id: subscriptionId,
+    };
+    const subscription: Subscriptions = await this.subscriptionsRepository.findOneBy(where);
+
+    if (!subscription) {
+      throw new NotFoundSubcription(subscriptionId);
+    }
+
+    const events: string[] = Object.values(ABI);
+    const infura = await new ethers.providers.InfuraProvider(process.env.NETWORK, process.env.API_KEY);
+    const daiContract = new ethers.Contract(subscription.contractAddress, events, infura);
+
+    daiContract.removeAllListeners();
+
+    await this.subscriptionsRepository.delete(where);
   }
 }
