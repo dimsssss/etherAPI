@@ -25,7 +25,7 @@ export class SubcriptionController {
   /**
    *
    * @param subscriptionId API 명세에는 subscription-id로 고정되어있지만
-   * -가 추가되어서 param으로 뽑기가 어려워 편의를 위해 subscriptionId로 변경하였습니다
+   * param으로 뽑기가 어려워 편의를 위해 subscriptionId로 변경하였습니다
    * @returns
    */
   @Get(':subscriptionId')
