@@ -9,6 +9,7 @@ import { plainToClass, plainToInstance } from 'class-transformer';
 import { ChainEventLog } from './entity/ChainEventLog';
 import { SummaryLog } from './dto/SummaryLog';
 import { GetSubscriptionsResponseDto } from './dto/GetSubscriptionsResponseDto';
+import { ABI } from './enums/ABI';
 
 @Injectable()
 export class SubscriptionsService {
@@ -21,15 +22,7 @@ export class SubscriptionsService {
   async registerSubscriptions(subcriptions: CreateSubscriptions): Promise<CreateSubscriptionsResponse> {
     const result = await this.subscriptionsRepository.save(subcriptions);
     const infura = await new ethers.providers.InfuraProvider('homestead', '31a0448161bd4c9c9dcb5cf5fa715cd4');
-    const daiAbi: string[] = [
-      'event Transfer(address indexed from, address indexed to, uint256 amount)',
-      'event Approval(address indexed from, address indexed to, uint256 amount)',
-      'event ApprovalForAll(address indexed from, address indexed to, bool isApproval)',
-      'event PunkOffered(uint256, uint256, address)',
-      'event PunkTransfer(address, address, uint256)',
-    ];
-
-    const daiContract = new ethers.Contract(subcriptions.contractAddress, daiAbi, infura);
+    const daiContract = new ethers.Contract(subcriptions.contractAddress, Object.values(ABI), infura);
 
     daiContract.on('Transfer', (from, to, amount, event) => {
       this.chainEventLogRepository.save(plainToClass(ChainEventLog, event));
