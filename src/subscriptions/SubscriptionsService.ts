@@ -28,27 +28,23 @@ export class SubscriptionsService {
       'event PunkOffered(uint256, uint256, address)',
       'event PunkTransfer(address, address, uint256)',
     ];
+
     const daiContract = new ethers.Contract(subcriptions.contractAddress, daiAbi, infura);
 
     daiContract.on('Transfer', (from, to, amount, event) => {
-      console.log(`Transfer ${from} sent ${ethers.utils.formatEther(amount)} to ${to}`);
-      console.log(event);
+      this.chainEventLogRepository.save(plainToClass(ChainEventLog, event));
     });
     daiContract.on('Approval', (from, to, amount, event) => {
-      console.log(`Approval ${from} sent ${ethers.utils.formatEther(amount)} to ${to}`);
-      console.log(event);
+      this.chainEventLogRepository.save(plainToClass(ChainEventLog, event));
     });
     daiContract.on('ApprovalForAll', (from, to, isApproval, event) => {
-      console.log(`ApprovalForAll ${from} sent ${isApproval} to ${to}`);
-      console.log(event);
+      this.chainEventLogRepository.save(plainToClass(ChainEventLog, event));
     });
     daiContract.on('PunkOffered', (value1, value2, address, event) => {
-      console.log(`PunkOffered ${value1}  ${value2} to ${address}`);
-      console.log(event);
+      this.chainEventLogRepository.save(plainToClass(ChainEventLog, event));
     });
     daiContract.on('PunkTransfer', (from, to, amount, event) => {
-      console.log(`PunkTransfer ${from} sent ${ethers.utils.formatEther(amount)} to ${to}`);
-      console.log(event);
+      this.chainEventLogRepository.save(plainToClass(ChainEventLog, event));
     });
     return plainToClass(CreateSubscriptionsResponse, result);
   }
@@ -64,13 +60,13 @@ export class SubscriptionsService {
       .where('id = :id', { id: subscriptionId })
       .getOne();
     const where: FindOptionsWhere<ChainEventLog> = {
-      contractAddress: subscription.contractAddress,
+      address: subscription.contractAddress,
     };
 
     const [log, logSize]: [log: ChainEventLog[], logSize: number] = await this.chainEventLogRepository.findAndCountBy(
       where,
     );
-    const summary: SummaryLog = plainToClass(SummaryLog, { logSize, firstLogTimestamp: log[0].timestamp });
+    const summary: SummaryLog = plainToClass(SummaryLog, { logSize, firstLogTimestamp: log[0].createdAt });
     const subscriptions: GetSubscriptionsResponseDto = plainToClass(GetSubscriptionsResponseDto, {
       ...plainToClass(CreateSubscriptionsResponse, subscription),
       ...summary,
