@@ -6,13 +6,7 @@ export class ChainEventLog {
   id: number;
 
   @Column()
-  timestamp: Date;
-
-  @Column()
   blockNumber: number;
-
-  @Column()
-  contractAddress: string;
 
   @Column()
   blockHash: string;
