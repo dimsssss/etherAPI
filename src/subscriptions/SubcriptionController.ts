@@ -1,10 +1,20 @@
-import { Body, Controller, Post, Get, Param } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  Get,
+  Delete,
+  Param,
+  BadRequestException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { CreateSubscriptions } from './dto/CreateSubscriptions';
 import { SubscriptionsService } from './SubscriptionsService';
 import { CreateSubscriptionsResponse } from './dto/CreateSubscriptionsResponse';
 import { ValidationPipe } from './pipe/ValidationPipe';
 import { SubscriptionsList } from './dto/SubscriptionsList';
 import { GetSubscriptionsResponseDto } from './dto/GetSubscriptionsResponseDto';
+import { NotFoundSubcription } from './exceptions/NotFoundSubcription';
 
 @Controller('/subscriptions')
 export class SubcriptionController {
@@ -31,5 +41,17 @@ export class SubcriptionController {
   @Get(':subscriptionId')
   async getSubscription(@Param('subscriptionId') subscriptionId: number): Promise<GetSubscriptionsResponseDto> {
     return await this.subscriptionsService.getSubscription(subscriptionId);
+  }
+
+  @Delete(':subscriptionId')
+  async deleteSubscription(@Param('subscriptionId') subscriptionId: number): Promise<void> {
+    try {
+      await this.subscriptionsService.deleteSubscription(subscriptionId);
+    } catch (err) {
+      if (err instanceof NotFoundSubcription) {
+        throw new BadRequestException(err);
+      }
+      throw new InternalServerErrorException(err);
+    }
   }
 }
