@@ -44,9 +44,9 @@ export class SubcriptionController {
   }
 
   @Delete(':subscriptionId')
-  async deleteSubscription(@Param('subscriptionId') subscriptionId: number): Promise<void> {
+  async deleteSubscription(@Param('subscriptionId') subscriptionId: number): Promise<CreateSubscriptionsResponse> {
     try {
-      await this.subscriptionsService.deleteSubscription(subscriptionId);
+      return await this.subscriptionsService.deleteSubscription(subscriptionId);
     } catch (err) {
       if (err instanceof NotFoundSubcription) {
         throw new BadRequestException(err);

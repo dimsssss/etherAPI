@@ -26,21 +26,21 @@ export class SubscriptionsService {
     const daiContract = new ethers.Contract(subcriptions.contractAddress, Object.values(ABI), infura);
 
     daiContract.on('Transfer', (from, to, amount, event) => {
-      this.chainEventLogRepository.save(plainToClass(ChainEventLog, event));
+      this.chainEventLogRepository.save(plainToClass(ChainEventLog, event, { excludeExtraneousValues: true }));
     });
     daiContract.on('Approval', (from, to, amount, event) => {
-      this.chainEventLogRepository.save(plainToClass(ChainEventLog, event));
+      this.chainEventLogRepository.save(plainToClass(ChainEventLog, event, { excludeExtraneousValues: true }));
     });
     daiContract.on('ApprovalForAll', (from, to, isApproval, event) => {
-      this.chainEventLogRepository.save(plainToClass(ChainEventLog, event));
+      this.chainEventLogRepository.save(plainToClass(ChainEventLog, event, { excludeExtraneousValues: true }));
     });
     daiContract.on('PunkOffered', (value1, value2, address, event) => {
-      this.chainEventLogRepository.save(plainToClass(ChainEventLog, event));
+      this.chainEventLogRepository.save(plainToClass(ChainEventLog, event, { excludeExtraneousValues: true }));
     });
     daiContract.on('PunkTransfer', (from, to, amount, event) => {
-      this.chainEventLogRepository.save(plainToClass(ChainEventLog, event));
+      this.chainEventLogRepository.save(plainToClass(ChainEventLog, event, { excludeExtraneousValues: true }));
     });
-    return plainToClass(CreateSubscriptionsResponse, result);
+    return plainToClass(CreateSubscriptionsResponse, result, { excludeExtraneousValues: true });
   }
 
   async getSubscriptionList(): Promise<CreateSubscriptionsResponse[]> {
@@ -68,7 +68,7 @@ export class SubscriptionsService {
     return subscriptions;
   }
 
-  async deleteSubscription(subscriptionId: number): Promise<void> {
+  async deleteSubscription(subscriptionId: number): Promise<CreateSubscriptionsResponse> {
     const where: FindOptionsWhere<ChainEventLog> = {
       id: subscriptionId,
     };
@@ -83,7 +83,8 @@ export class SubscriptionsService {
     const daiContract = new ethers.Contract(subscription.contractAddress, events, infura);
 
     daiContract.removeAllListeners();
-
-    await this.subscriptionsRepository.delete(where);
+    await this.subscriptionsRepository.softDelete(where);
+    const result: Subscriptions = await this.subscriptionsRepository.findOne({ withDeleted: true, where });
+    return plainToClass(CreateSubscriptionsResponse, result);
   }
 }
