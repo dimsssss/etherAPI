@@ -1,4 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
+  OneToMany,
+} from 'typeorm';
+import { ChainEventLog } from './ChainEventLog';
 
 @Entity()
 export class Subscriptions {
@@ -19,4 +28,7 @@ export class Subscriptions {
 
   @DeleteDateColumn()
   deletedAt: Date;
+
+  @OneToMany((type) => ChainEventLog, (c) => c.address)
+  logs: ChainEventLog[];
 }
