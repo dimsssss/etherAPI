@@ -1,7 +1,21 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  BeforeInsert,
+  ManyToOne,
+} from 'typeorm';
+import { Subscriptions } from './Subscriptions';
 
 @Entity('ChainEventLog')
 export class ChainEventLog {
+  @BeforeInsert()
+  adressToLower() {
+    this.address = this.address.toLowerCase();
+  }
+
   @PrimaryGeneratedColumn('increment')
   id: number;
 
@@ -37,4 +51,7 @@ export class ChainEventLog {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @ManyToOne((type) => Subscriptions, (s) => s.contractAddress)
+  subscription: Subscriptions;
 }
