@@ -1,4 +1,5 @@
-import { ChainEventLog } from '../entity/ChainEventLog';
+import { EventLog } from './EventLog';
+import { Type } from 'class-transformer';
 
 export class GetSubscriptionLogsResponseDto {
   id: number;
@@ -9,5 +10,6 @@ export class GetSubscriptionLogsResponseDto {
   sort: 'asc' | 'desc';
   start: number | null;
   end: number | null;
-  logs: ChainEventLog[];
+  @Type(() => EventLog)
+  logs: EventLog[];
 }

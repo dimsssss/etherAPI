@@ -1,12 +1,11 @@
 import { Module } from '@nestjs/common';
 import { SubcriptionController } from './SubcriptionController';
 import { SubscriptionsService } from './SubscriptionsService';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { Subscriptions } from './entity/Subscriptions';
-import { ChainEventLog } from './entity/ChainEventLog';
+import { InfraModule } from './infra/InfraModule';
+import { UtilsModule } from './utils/UtilsModule';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Subscriptions, ChainEventLog])],
+  imports: [InfraModule, UtilsModule],
   controllers: [SubcriptionController],
   providers: [SubscriptionsService],
 })

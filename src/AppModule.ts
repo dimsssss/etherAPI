@@ -11,6 +11,7 @@ import { ConfigModule } from '@nestjs/config';
       type: 'sqlite',
       database: './data/ether.sqlite',
       entities: [Subscriptions, ChainEventLog],
+      logging: true,
     }),
     ConfigModule.forRoot(),
     SubcriptionModule,
